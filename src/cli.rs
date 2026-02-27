@@ -8,8 +8,17 @@ use std::path::PathBuf;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Route directory path
+    /// Route (root) directory path
     route_dir: PathBuf,
+
+    /// Optional GeoPackage file path (defaults to first .gpkg in <route_dir>/config)
+    gpkg_file: Option<PathBuf>,
+
+    /// Optional lateral inflow CSV directory (defaults to <route_dir>/outputs/ngen)
+    csv_dir: Option<PathBuf>,
+
+    /// Optional output data directory (defaults to <route_dir>/outputs/troute)
+    data_dir: Option<PathBuf>,
 
     /// Internal timestep in seconds
     #[arg(short, long, default_value_t = 300)]
@@ -44,18 +53,29 @@ pub fn get_args() -> Result<Config> {
     let args = Args::parse();
 
     let root_dir = args.route_dir;
-    let csv_dir = root_dir.join("outputs").join("ngen");
     let config_dir = root_dir.join("config");
-    let output_dir = root_dir.join("outputs").join("troute");
 
-    // Find the .gpkg file in the config directory
-    let gpkg_file = config_dir
-        .read_dir()
-        .context("Failed to read config directory")?
-        .filter_map(Result::ok)
-        .find(|entry| entry.path().extension().map_or(false, |ext| ext == "gpkg"))
-        .ok_or_else(|| anyhow::anyhow!("No .gpkg file found in config directory"))?
-        .path();
+    let csv_dir = args
+        .csv_dir
+        .unwrap_or_else(|| root_dir.join("outputs").join("ngen"));
+
+    let output_dir = args
+        .data_dir
+        .unwrap_or_else(|| root_dir.join("outputs").join("troute"));
+
+    // Use provided .gpkg path when available; otherwise preserve legacy discovery.
+    let gpkg_file = if let Some(path) = args.gpkg_file {
+        path
+    } else {
+        config_dir
+            .read_dir()
+            .context("Failed to read config directory")?
+            .filter_map(Result::ok)
+            .find(|entry| entry.path().extension().map_or(false, |ext| ext == "gpkg"))
+            .ok_or_else(|| anyhow::anyhow!("No .gpkg file found in config directory"))?
+            .path()
+    };
+
     let cfg = Config {
         config_dir,
         csv_dir,
