@@ -119,7 +119,7 @@ fn process_node_all_timesteps(
             depth_p,
             false,
         );
-        let (qdc, velc, depthc) = (result.qdc, result.velc, result.depthc);
+        let (qdc, depthc) = (result.qdc, result.depthc);
         // let (qdc, velc, depthc, _, _, _) = mc_kernel::submuskingcunge(
         //     qup,
         //     upstream_flow,
@@ -139,9 +139,6 @@ fn process_node_all_timesteps(
         // );
 
         results.flow_data.push(qdc);
-        // results.velocity_data.push(velc);
-        // results.depth_data.push(depthc);
-
         qup = upstream_flow;
         qdp = qdc;
         depth_p = depthc;
