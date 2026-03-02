@@ -67,8 +67,8 @@ fn process_node_all_timesteps(
     if inflow.len() == 0 && external_flows.len() == 0 {
         // if these are both empty then just return all zeros to the results
         results.flow_data = vec![0.0; max_timesteps];
-        results.velocity_data = vec![0.0; max_timesteps];
-        results.depth_data = vec![0.0; max_timesteps];
+        // results.velocity_data = vec![0.0; max_timesteps];
+        // results.depth_data = vec![0.0; max_timesteps];
         return Ok(results);
     }
 
@@ -139,8 +139,8 @@ fn process_node_all_timesteps(
         // );
 
         results.flow_data.push(qdc);
-        results.velocity_data.push(velc);
-        results.depth_data.push(depthc);
+        // results.velocity_data.push(velc);
+        // results.depth_data.push(depthc);
 
         qup = upstream_flow;
         qdp = qdc;
